@@ -21,7 +21,7 @@ interface EventWizardProps {
 
 export function EventWizard({ open, onOpenChange }: EventWizardProps) {
     const { venues, resources, events, addEvent } = useEvents();
-    const { role } = useAuth();
+    const { role, userId, department, school } = useAuth();
     const [step, setStep] = useState(1);
 
     // Form State
@@ -83,8 +83,6 @@ export function EventWizard({ open, onOpenChange }: EventWizardProps) {
     }
 
     const handleSubmit = () => {
-        const { userId, department, school } = useAuth();
-
         const newEvent: Event = {
             id: `evt-${Date.now()}`,
             title,
@@ -103,14 +101,19 @@ export function EventWizard({ open, onOpenChange }: EventWizardProps) {
             optionalResources: [],
             status: 'Pending HOD', // Initial status after submission
             requesterRole: role,
-            requesterId: userId,
-            department: department,
-            school: school,
+            requesterId: userId || 'coord-1',
+            department: department || 'CSE',
+            school: school || 'Engineering',
             approvalChain: [
                 { role: 'HOD' as const, action: 'Pending' as const },
                 { role: 'Dean' as const, action: 'Pending' as const },
                 { role: 'Head' as const, action: 'Pending' as const }
             ],
+            venuePreference: {
+                type: 'Auditorium',
+                minCapacity: participants,
+                preferredFeatures: []
+            },
             executionState: 'Not Started',
             isModifiable: false,
             createdAt: new Date().toISOString(),
