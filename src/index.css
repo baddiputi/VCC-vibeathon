@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Vibrant Light Theme for Event Management */
+    --background: 240 20% 99%;
+    --foreground: 240 15% 9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 15% 9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 15% 9%;
+
+    /* Vibrant Royal Blue Primary */
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Vibrant Purple Secondary */
+    --secondary: 270 75% 60%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%;
+
+    --accent: 270 75% 95%;
+    --accent-foreground: 270 75% 25%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 217 91% 60%;
+
+    --radius: 0.5rem;
+
+    /* Event Status Colors - Vibrant */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Custom vibrant enhancements */
+@layer components {
+  .card-gradient {
+    @apply bg-gradient-to-br from-white to-blue-50/50;
+  }
+
+  .status-approved {
+    @apply bg-emerald-500 text-white;
+  }
+
+  .status-pending {
+    @apply bg-amber-500 text-white;
+  }
+
+  .status-rejected {
+    @apply bg-rose-500 text-white;
+  }
+
+  .status-running {
+    @apply bg-blue-500 text-white;
+  }
+
+  .venue-available {
+    @apply bg-emerald-50 border-emerald-400 text-emerald-700;
+  }
+
+  .venue-occupied {
+    @apply bg-rose-50 border-rose-400 text-rose-700;
+  }
+
+  .venue-reserved {
+    @apply bg-amber-50 border-amber-400 text-amber-700;
+  }
+}
