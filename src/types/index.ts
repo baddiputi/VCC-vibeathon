@@ -124,7 +124,8 @@ export interface Event {
     executionState: EventExecutionState;
     requesterRole: Role;
     requesterId: string; // Coordinator ID
-    department?: string;
+    department?: string; // e.g., 'CSE', 'ECE' - for HOD scoping
+    school?: string; // e.g., 'Engineering', 'Management' - for Dean scoping
 
     // Approval & Rejection
     rejectionReason?: string;

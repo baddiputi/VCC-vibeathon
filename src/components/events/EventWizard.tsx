@@ -70,13 +70,21 @@ export function EventWizard({ open, onOpenChange }: EventWizardProps) {
             }
             if (count > 0) {
                 const res = resources.find(r => r.id === resId);
-                return [...prev, { id: resId, name: res?.name || '', count }];
+                return [...prev, {
+                    id: resId,
+                    name: res?.name || '',
+                    count,
+                    type: 'Equipment' as const,
+                    priority: 'Mandatory' as const
+                }];
             }
             return prev;
         });
     }
 
     const handleSubmit = () => {
+        const { userId, department, school } = useAuth();
+
         const newEvent: Event = {
             id: `evt-${Date.now()}`,
             title,
@@ -85,9 +93,28 @@ export function EventWizard({ open, onOpenChange }: EventWizardProps) {
             end: new Date(endDate).toISOString(),
             venueId: selectedVenue,
             participantCount: participants,
-            resources: selectedResources,
-            status: 'Submitted', // Initial status
+            mandatoryResources: selectedResources.map(r => ({
+                id: r.id,
+                name: r.name,
+                count: r.count,
+                type: 'Equipment' as const,
+                priority: 'Mandatory' as const
+            })),
+            optionalResources: [],
+            status: 'Pending HOD', // Initial status after submission
             requesterRole: role,
+            requesterId: userId,
+            department: department,
+            school: school,
+            approvalChain: [
+                { role: 'HOD' as const, action: 'Pending' as const },
+                { role: 'Dean' as const, action: 'Pending' as const },
+                { role: 'Head' as const, action: 'Pending' as const }
+            ],
+            executionState: 'Not Started',
+            isModifiable: false,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
         };
         addEvent(newEvent);
         onOpenChange(false);

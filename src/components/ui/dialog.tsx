@@ -89,10 +89,16 @@ const DialogDescription = React.forwardRef<
 ))
 DialogDescription.displayName = "DialogDescription"
 
+const DialogContent = (props: React.HTMLAttributes<HTMLDivElement>) => {
+    return <div {...props} />;
+};
+DialogContent.displayName = "DialogContent";
+
 export {
     Dialog,
     DialogHeader,
     DialogFooter,
     DialogTitle,
     DialogDescription,
+    DialogContent,
 }

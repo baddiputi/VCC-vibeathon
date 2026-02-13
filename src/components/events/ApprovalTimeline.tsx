@@ -6,8 +6,8 @@ import { useAuth, Role } from "@/context/AuthContext";
 
 interface TimelineProps {
     event: Event;
-    onApprove: () => void;
-    onReject: (reason: string) => void;
+    onApprove?: () => void;
+    onReject?: (reason: string) => void;
 }
 
 const STEPS = [

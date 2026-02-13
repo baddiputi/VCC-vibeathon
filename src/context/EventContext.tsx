@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { Event, Venue, ResourceItem } from '@/types';
+import { Role } from '@/context/AuthContext';
 import { addHours, startOfToday } from 'date-fns';
 
 // Mock Data Setup
@@ -41,7 +42,8 @@ const MOCK_EVENTS: Event[] = [
         executionState: 'In Progress',
         requesterRole: 'Coordinator',
         requesterId: 'coord-1',
-        department: 'Robotics Club',
+        department: 'CSE',
+        school: 'Engineering',
         approvalChain: [
             { role: 'HOD', action: 'Approved', timestamp: addHours(today, -48).toISOString() },
             { role: 'Dean', action: 'Approved', timestamp: addHours(today, -24).toISOString() },
@@ -70,7 +72,8 @@ const MOCK_EVENTS: Event[] = [
         executionState: 'Not Started',
         requesterRole: 'Coordinator',
         requesterId: 'coord-2',
-        department: 'Student Council',
+        department: 'ECE',
+        school: 'Engineering',
         approvalChain: [
             { role: 'HOD', action: 'Approved', timestamp: addHours(today, -12).toISOString() },
             { role: 'Dean', action: 'Pending' },
@@ -94,7 +97,8 @@ const MOCK_EVENTS: Event[] = [
         executionState: 'Cancelled',
         requesterRole: 'Coordinator',
         requesterId: 'coord-3',
-        department: 'Esports Club',
+        department: 'MBA',
+        school: 'Management',
         rejectionReason: 'Venue Double Booked with Faculty Meeting',
         approvalChain: [
             { role: 'HOD', action: 'Rejected', timestamp: addHours(today, -48).toISOString() }
@@ -114,6 +118,9 @@ interface EventContextType {
     deleteEvent: (id: string) => void;
     markEventStart: (eventId: string) => void;
     markEventComplete: (eventId: string) => void;
+    approveEvent: (eventId: string, approverRole: Role, comment?: string) => void;
+    rejectEvent: (eventId: string, approverRole: Role, reason: string) => void;
+    requestModification: (eventId: string, reason: string) => void;
 }
 
 const EventContext = createContext<EventContextType | undefined>(undefined);
@@ -166,6 +173,70 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
         );
     };
 
+    const approveEvent = (eventId: string, approverRole: Role, comment?: string) => {
+        setEvents(prev => prev.map(evt => {
+            if (evt.id !== eventId) return evt;
+
+            // Determine next status based on current role
+            let nextStatus: Event['status'] = evt.status;
+            if (approverRole === 'HOD' && evt.status === 'Pending HOD') {
+                nextStatus = 'Pending Dean';
+            } else if (approverRole === 'Dean' && evt.status === 'Pending Dean') {
+                nextStatus = 'Pending Head';
+            } else if (approverRole === 'Head' && evt.status === 'Pending Head') {
+                nextStatus = 'Approved';
+            }
+
+            // Add approval to chain
+            const updatedChain = evt.approvalChain.map(item =>
+                item.role === approverRole && item.action === 'Pending'
+                    ? { ...item, action: 'Approved' as const, timestamp: new Date().toISOString(), notes: comment }
+                    : item
+            );
+
+            return {
+                ...evt,
+                status: nextStatus,
+                approvalChain: updatedChain,
+                updatedAt: new Date().toISOString()
+            };
+        }));
+    };
+
+    const rejectEvent = (eventId: string, approverRole: Role, reason: string) => {
+        setEvents(prev => prev.map(evt => {
+            if (evt.id !== eventId) return evt;
+
+            // Update approval chain
+            const updatedChain = evt.approvalChain.map(item =>
+                item.role === approverRole && item.action === 'Pending'
+                    ? { ...item, action: 'Rejected' as const, timestamp: new Date().toISOString(), notes: reason }
+                    : item
+            );
+
+            return {
+                ...evt,
+                status: 'Rejected',
+                rejectionReason: reason,
+                approvalChain: updatedChain,
+                updatedAt: new Date().toISOString()
+            };
+        }));
+    };
+
+    const requestModification = (eventId: string, reason: string) => {
+        setEvents(prev => prev.map(evt =>
+            evt.id === eventId
+                ? {
+                    ...evt,
+                    isModifiable: true,
+                    rejectionReason: reason,
+                    updatedAt: new Date().toISOString()
+                }
+                : evt
+        ));
+    };
+
     return (
         <EventContext.Provider value={{
             events,
@@ -175,7 +246,10 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
             updateEventStatus,
             deleteEvent,
             markEventStart,
-            markEventComplete
+            markEventComplete,
+            approveEvent,
+            rejectEvent,
+            requestModification
         }}>
             {children}
         </EventContext.Provider>
